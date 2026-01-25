@@ -134,7 +134,15 @@ bool JpegAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
           return false;
         }
 
-        std::string xmpStr(xmpContent.begin(), xmpContent.end());
+        if (xmpContent.size() < 2 || xmpContent[0] != '\0') {
+          return false;
+        }
+
+        std::string xmpStr(reinterpret_cast<const char *>(xmpContent.data() + 1),
+                           static_cast<size_t>(xmpContent.size() - 1));
+        if (xmpStr.find("<x:xmpmeta") == std::string::npos) {
+          return false;
+        }
         std::string pureJson;
         if (!extractAigcJsonFromXmp(xmpStr, pureJson)) {
           return false;
