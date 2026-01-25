@@ -7,6 +7,7 @@
 #pragma once
 #include <cstdint>
 
+namespace gimt {
 class BinaryReader {
 private:
   std::istream& stream;
@@ -50,6 +51,8 @@ public:
     return stream.peek() == EOF;
   }
 };
+}
+
 
 
 #endif //GIMT_BINARY_READER_H

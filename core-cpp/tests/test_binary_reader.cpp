@@ -7,6 +7,7 @@
 #include <memory>
 
 using namespace testing;
+using namespace gimt;
 
 // 定义 Test Fixture
 class BinaryReaderTest : public Test {
