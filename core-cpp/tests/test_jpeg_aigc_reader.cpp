@@ -34,7 +34,8 @@ TEST_F(JpegAIGCReaderTest, ReadAIGCInfoFailsWithoutPrepare) {
 }
 
 TEST_F(JpegAIGCReaderTest, ReadAIGCInfoFailedIfNotAJpegFile) {
-  auto pngPath = finder.find("png_empty.jpg");
+  auto pngPath = finder.find("png_empty.png");
+  ASSERT_THAT(reader.prepare(pngPath), IsTrue());
 
   bool result = reader.readAIGCInfo(info);
 
