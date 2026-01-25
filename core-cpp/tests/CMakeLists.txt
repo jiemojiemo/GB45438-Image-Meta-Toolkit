@@ -14,4 +14,8 @@ target_link_libraries(gimt_unit_tests
         gimt_core_cpp
 )
 
-add_test(NAME gimt_unit_tests COMMAND gimt_unit_tests)
+add_test(
+        NAME gimt_unit_tests
+        WORKING_DIRECTORY ./
+        COMMAND gimt_unit_tests
+)

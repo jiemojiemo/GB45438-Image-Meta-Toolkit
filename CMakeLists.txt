@@ -4,4 +4,5 @@ project(ImageMetaToolkit)
 
 set(GIMT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
+enable_testing()
 add_subdirectory(core-cpp)
