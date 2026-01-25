@@ -5,6 +5,7 @@
 #ifndef GIMT_PATTER_MATCHER_H
 #define GIMT_PATTER_MATCHER_H
 #include <string>
+#include <vector>
 namespace gimt {
 class PatternMatcher {
 public:

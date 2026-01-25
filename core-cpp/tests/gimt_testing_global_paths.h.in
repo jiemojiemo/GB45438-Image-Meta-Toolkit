@@ -1,0 +1,16 @@
+//
+// Created by user on 1/25/26.
+//
+
+#ifndef GIMT_GLOBAL_PATHS_H_IN_H
+#define GIMT_GLOBAL_PATHS_H_IN_H
+#include <string>
+
+namespace gimt_testing
+{
+static std::string GIMT_ROOT_DIR = "@GIMT_ROOT_DIR@";
+static std::string GIMT_RESOURCE_DIR = "@GIMT_ROOT_DIR@/resource";
+}
+
+
+#endif //GIMT_GLOBAL_PATHS_H_IN_H

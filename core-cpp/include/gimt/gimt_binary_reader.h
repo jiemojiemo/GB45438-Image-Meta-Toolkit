@@ -6,6 +6,7 @@
 #define GIMT_BINARY_READER_H
 #pragma once
 #include <cstdint>
+#include <istream>
 
 namespace gimt {
 class BinaryReader {
