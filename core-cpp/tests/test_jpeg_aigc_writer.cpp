@@ -2,12 +2,13 @@
 // Created by user on 1/25/26.
 //
 
+#include "gimt/gimt_binary_reader.h"
+#include "gimt/gimt_patter_matcher.h"
 #include "gimt/gimt_jpeg_aigc_reader.h"
 #include "gimt/gimt_jpeg_aigc_writer.h"
 #include "gimt_testing_resource_finder.h"
 #include <fstream>
 #include <gmock/gmock.h>
-#include <iterator>
 #include <vector>
 
 using namespace testing;
@@ -95,32 +96,31 @@ TEST_F(JpegAIGCWriterTest, InsertsApp1AfterApp0WhenApp0Present) {
   std::ifstream outFile(outPath, std::ios::binary);
   ASSERT_TRUE(outFile.is_open());
 
-  std::vector<uint8_t> fileData((std::istreambuf_iterator<char>(outFile)),
-                                std::istreambuf_iterator<char>());
-  ASSERT_GE(fileData.size(), 10u);
-  ASSERT_EQ(fileData[0], 0xFF);
-  ASSERT_EQ(fileData[1], 0xD8);
+  gimt::BinaryReader fileReader(outFile);
+  uint8_t marker[2];
 
-  size_t offset = 2;
-  ASSERT_LT(offset + 3, fileData.size());
-  ASSERT_EQ(fileData[offset], 0xFF);
-  ASSERT_EQ(fileData[offset + 1], 0xE0);
+  ASSERT_EQ(fileReader.readBytes(marker, 2), 2u);
+  ASSERT_EQ(marker[0], 0xFF);
+  ASSERT_EQ(marker[1], 0xD8);
 
-  uint16_t app0Len =
-      (static_cast<uint16_t>(fileData[offset + 2]) << 8) | fileData[offset + 3];
-  size_t app0End = offset + 2 + app0Len;
-  ASSERT_LE(app0End, fileData.size());
+  ASSERT_EQ(fileReader.readBytes(marker, 2), 2u);
+  ASSERT_EQ(marker[0], 0xFF);
+  ASSERT_EQ(marker[1], 0xE0);
 
-  size_t nextMarker = app0End;
-  ASSERT_LT(nextMarker + 3, fileData.size());
-  ASSERT_EQ(fileData[nextMarker], 0xFF);
-  ASSERT_EQ(fileData[nextMarker + 1], 0xE1);
+  uint16_t app0Len = fileReader.readU16BE();
+  ASSERT_GT(app0Len, 2u);
+  fileReader.skip(app0Len - 2);
+
+  ASSERT_EQ(fileReader.readBytes(marker, 2), 2u);
+  ASSERT_EQ(marker[0], 0xFF);
+  ASSERT_EQ(marker[1], 0xE1);
+
+  uint16_t app1Len = fileReader.readU16BE();
+  ASSERT_GT(app1Len, 2u);
 
   const std::string expectedSig = "http://ns.adobe.com/xap/1.0/";
-  size_t sigStart = nextMarker + 4;
-  ASSERT_LE(sigStart + expectedSig.size(), fileData.size());
-  std::string actualSig(reinterpret_cast<const char *>(&fileData[sigStart]),
-                        expectedSig.size());
-  ASSERT_EQ(actualSig, expectedSig);
+  std::vector<uint8_t> sigBuf(expectedSig.size());
+  ASSERT_EQ(fileReader.readBytes(sigBuf.data(), sigBuf.size()), sigBuf.size());
+  ASSERT_TRUE(gimt::PatternMatcher::matchString(sigBuf.data(), sigBuf.size(), expectedSig));
 }
 
