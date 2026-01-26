@@ -3,6 +3,7 @@
 //
 
 #include "gimt/gimt_jpeg_aigc_writer.h"
+#include "gimt/gimt_xml_utils.h"
 
 #include <cstdint>
 #include <fstream>
@@ -17,12 +18,12 @@ size_t findApp0EndOffset(const std::vector<uint8_t> &data) {
   size_t app0End = 2;
   const size_t dataSize = data.size();
   while (offset + 3 < dataSize) {
-    if (data[offset] != 0xFF) {
+    if (data[offset] != gimt::JPEG_MARKER_PREFIX) {
       break;
     }
 
     uint8_t marker = data[offset + 1];
-    if (marker != 0xE0) {
+    if (marker != gimt::JPEG_APP0) {
       break;
     }
 
@@ -46,70 +47,6 @@ size_t findApp0EndOffset(const std::vector<uint8_t> &data) {
 } // namespace
 
 namespace gimt {
-namespace {
-
-constexpr const char XMP_SIGNATURE[] = "http://ns.adobe.com/xap/1.0/";
-
-std::string buildXmpPayload(const std::string &escapedJson) {
-  std::string payload;
-  payload.reserve(256);
-  payload += "<x:xmpmeta xmlns:x=\"adobe:ns:meta/\">";
-  payload += "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" "
-             "xmlns:TC260=\"http://ns.adobe.com/xap/1.0/tc/\">";
-  payload += "<rdf:Description rdf:about=\"\" TC260:AIGC=\"";
-  payload += escapedJson;
-  payload += "\"/>";
-  payload += "</rdf:RDF>";
-  payload += "</x:xmpmeta>";
-  return payload;
-}
-
-// 简单 XML entity 转义，与读取端的 xmlUnescape 互补
-std::string xmlEscape(const std::string &str) {
-  std::string result;
-  result.reserve(str.size());
-
-  for (char ch : str) {
-    switch (ch) {
-    case '&':
-      result += "&amp;";
-      break;
-    case '<':
-      result += "&lt;";
-      break;
-    case '>':
-      result += "&gt;";
-      break;
-    case '"':
-      result += "&quot;";
-      break;
-    case '\'':
-      result += "&apos;";
-      break;
-    default:
-      result += ch;
-      break;
-    }
-  }
-
-  return result;
-}
-
-std::string buildAigcJson(const AIGCInfo &info) {
-  // 与 AIGCInfo::parseJsonToStruct 中使用的 Key 保持一致
-  std::string json = "{";
-  json += "\"Label\":\"" + info.label + "\"";
-  json += ",\"ContentProducer\":\"" + info.contentProducer + "\"";
-  json += ",\"ProduceID\":\"" + info.produceID + "\"";
-  json += ",\"ReservedCode1\":\"" + info.reservedCode1 + "\"";
-  json += ",\"ContentPropagator\":\"" + info.contentPropagator + "\"";
-  json += ",\"PropagateID\":\"" + info.propagateID + "\"";
-  json += ",\"ReservedCode2\":\"" + info.reservedCode2 + "\"";
-  json += "}";
-  return json;
-}
-
-} // namespace
 
 bool JpegAIGCWriter::prepare(const std::string &inputFilepath, const std::string &outputFilepath) {
   prepared_ = false;
@@ -129,7 +66,7 @@ bool JpegAIGCWriter::prepare(const std::string &inputFilepath, const std::string
   }
 
   // 校验 JPEG SOI
-  if (inputData_[0] != 0xFF || inputData_[1] != 0xD8) {
+  if (inputData_[0] != JPEG_MARKER_PREFIX || inputData_[1] != JPEG_SOI) {
     return false;
   }
 
@@ -159,7 +96,7 @@ bool JpegAIGCWriter::writeAIGCInfo(const AIGCInfo &info) {
   const size_t sigLen = xmpSigStr.size();
 
   // 构造 JSON + XML 转义后的 AIGC 字段
-  std::string json = buildAigcJson(info);
+  std::string json = info.toJson();
   std::string escapedJson = xmlEscape(json);
   std::string xmpPayload = buildXmpPayload(escapedJson);
 
@@ -179,8 +116,8 @@ bool JpegAIGCWriter::writeAIGCInfo(const AIGCInfo &info) {
   }
 
   // 写入 APP1 标记
-  out.put(static_cast<char>(0xFF));
-  out.put(static_cast<char>(0xE1));
+  out.put(static_cast<char>(JPEG_MARKER_PREFIX));
+  out.put(static_cast<char>(JPEG_APP1));
 
   // 写入段长度（大端）
   out.put(static_cast<char>((segmentLen >> 8) & 0xFF));

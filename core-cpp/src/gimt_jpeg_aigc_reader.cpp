@@ -3,53 +3,11 @@
 //
 
 #include "gimt/gimt_jpeg_aigc_reader.h"
+#include "gimt/gimt_xml_utils.h"
 
 #include <vector>
 
 namespace gimt {
-namespace {
-
-// 简单的 XML entity 反转义，只覆盖当前使用到的几种
-std::string xmlUnescape(std::string str) {
-  static const std::pair<std::string, std::string> entities[] = {
-      {"&quot;", "\""},
-      {"&amp;", "&"},
-      {"&lt;", "<"},
-      {"&gt;", ">"},
-      {"&apos;", "'"}};
-
-  size_t start_pos = 0;
-  for (const auto &entity : entities) {
-    start_pos = 0;
-    while ((start_pos = str.find(entity.first, start_pos)) != std::string::npos) {
-      str.replace(start_pos, entity.first.length(), entity.second);
-      start_pos += entity.second.length();
-    }
-  }
-  return str;
-}
-
-constexpr const char XMP_SIGNATURE[] = "http://ns.adobe.com/xap/1.0/";
-
-bool extractAigcJsonFromXmp(const std::string &xmpStr, std::string &outJson) {
-  const std::string targetKey = "TC260:AIGC=\"";
-  size_t startPos = xmpStr.find(targetKey);
-  if (startPos == std::string::npos) {
-    return false;
-  }
-
-  startPos += targetKey.length();
-  size_t endPos = xmpStr.find("\"", startPos);
-  if (endPos == std::string::npos || endPos <= startPos) {
-    return false;
-  }
-
-  std::string escapedJson = xmpStr.substr(startPos, endPos - startPos);
-  outJson = xmlUnescape(escapedJson);
-  return true;
-}
-
-} // namespace
 
 bool JpegAIGCReader::prepare(const std::string &filepath) {
   if (stream.is_open()) {
@@ -80,7 +38,7 @@ bool JpegAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
   if (reader->readBytes(soi, 2) != 2) {
     return false;
   }
-  if (soi[0] != 0xFF || soi[1] != 0xD8) {
+  if (soi[0] != JPEG_MARKER_PREFIX || soi[1] != JPEG_SOI) {
     // Not a JPEG
     return false;
   }
@@ -94,12 +52,12 @@ bool JpegAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
     }
 
     // 所有的 JPEG Marker 都以 0xFF 开头
-    if (marker[0] != 0xFF) {
+    if (marker[0] != JPEG_MARKER_PREFIX) {
       return false;
     }
 
     // SOS (Start of Scan) 标志着元数据区结束，图像数据开始
-    if (marker[1] == 0xDA) {
+    if (marker[1] == JPEG_SOS) {
       break;
     }
 
@@ -112,7 +70,7 @@ bool JpegAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
     uint16_t payloadLen = static_cast<uint16_t>(segmentLen - 2);
 
     // 判断是否是 APP1 (0xE1)
-    if (marker[1] == 0xE1) {
+    if (marker[1] == JPEG_APP1) {
       const std::string xmpSigStr(XMP_SIGNATURE);
       const size_t sigLen = xmpSigStr.size();
 

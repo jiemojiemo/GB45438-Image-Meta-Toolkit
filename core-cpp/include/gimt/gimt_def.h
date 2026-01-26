@@ -4,9 +4,21 @@
 
 #ifndef GIMT_DEF_H
 #define GIMT_DEF_H
+#include <cstdint>
 #include <string>
 
 namespace gimt {
+
+// JPEG Marker Constants
+constexpr uint8_t JPEG_MARKER_PREFIX = 0xFF;
+constexpr uint8_t JPEG_SOI = 0xD8;   // Start of Image
+constexpr uint8_t JPEG_SOS = 0xDA;   // Start of Scan
+constexpr uint8_t JPEG_APP0 = 0xE0;  // APP0 marker
+constexpr uint8_t JPEG_APP1 = 0xE1;  // APP1 marker
+
+// XMP Signature
+constexpr const char XMP_SIGNATURE[] = "http://ns.adobe.com/xap/1.0/";
+
 inline std::string getJsonValue(const std::string& json, const std::string& key) {
   // 构造查找关键字，例如 "Label":"
   std::string searchKey = "\"" + key + "\":\"";
@@ -38,6 +50,7 @@ public:
   std::string propagateID;       // 传播者 ID
   std::string reservedCode2;     // 预留字段 2
 
+  // Parse JSON string to populate AIGCInfo struct
   static void parseJsonToStruct(const std::string& jsonStr, AIGCInfo& info) {
     // 注意：JSON 中的 Key 是首字母大写的（根据你的 Extracted JSON 示例）
     info.label             = getJsonValue(jsonStr, "Label");
@@ -47,6 +60,20 @@ public:
     info.contentPropagator = getJsonValue(jsonStr, "ContentPropagator");
     info.propagateID       = getJsonValue(jsonStr, "PropagateID");
     info.reservedCode2     = getJsonValue(jsonStr, "ReservedCode2");
+  }
+
+  // Build JSON string from AIGCInfo struct
+  std::string toJson() const {
+    std::string json = "{";
+    json += "\"Label\":\"" + label + "\"";
+    json += ",\"ContentProducer\":\"" + contentProducer + "\"";
+    json += ",\"ProduceID\":\"" + produceID + "\"";
+    json += ",\"ReservedCode1\":\"" + reservedCode1 + "\"";
+    json += ",\"ContentPropagator\":\"" + contentPropagator + "\"";
+    json += ",\"PropagateID\":\"" + propagateID + "\"";
+    json += ",\"ReservedCode2\":\"" + reservedCode2 + "\"";
+    json += "}";
+    return json;
   }
 
   bool operator==(const AIGCInfo &info) const {
