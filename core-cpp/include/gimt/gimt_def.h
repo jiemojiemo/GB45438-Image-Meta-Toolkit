@@ -6,6 +6,7 @@
 #define GIMT_DEF_H
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace gimt {
 
@@ -16,8 +17,24 @@ constexpr uint8_t JPEG_SOS = 0xDA;   // Start of Scan
 constexpr uint8_t JPEG_APP0 = 0xE0;  // APP0 marker
 constexpr uint8_t JPEG_APP1 = 0xE1;  // APP1 marker
 
-// XMP Signature
+// PNG File Signature (8 bytes)
+inline std::vector<uint8_t> getPngSignature() {
+  return {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+}
+
+// PNG Chunk Types
+inline std::vector<uint8_t> getPngChunkIEND() {
+  return {'I', 'E', 'N', 'D'};
+}
+
+inline std::vector<uint8_t> getPngChunkITXt() {
+  return {'i', 'T', 'X', 't'};
+}
+
+// XMP Signatures
 constexpr const char XMP_SIGNATURE[] = "http://ns.adobe.com/xap/1.0/";
+constexpr const char PNG_XMP_KEYWORD[] = "XML:com.adobe.xmp";
+constexpr size_t PNG_XMP_KEYWORD_LEN = 17; // length of "XML:com.adobe.xmp" without null terminator
 
 inline std::string getJsonValue(const std::string& json, const std::string& key) {
   // 构造查找关键字，例如 "Label":"

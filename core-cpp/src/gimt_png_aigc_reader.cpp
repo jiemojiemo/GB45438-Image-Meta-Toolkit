@@ -10,17 +10,6 @@
 
 namespace gimt {
 
-// PNG 文件签名 (8 bytes)
-static const std::vector<uint8_t> PNG_SIGNATURE = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
-
-// PNG Chunk Types
-static const std::vector<uint8_t> PNG_CHUNK_IEND = {'I', 'E', 'N', 'D'};
-static const std::vector<uint8_t> PNG_CHUNK_iTXt = {'i', 'T', 'X', 't'};
-
-// XMP keyword for iTXt chunk
-static const std::string PNG_XMP_KEYWORD = "XML:com.adobe.xmp";
-static const size_t PNG_XMP_KEYWORD_LEN = 17; // without null terminator
-
 bool PngAIGCReader::prepare(const std::string &filepath) {
   if (stream.is_open()) {
     stream.close();
@@ -51,7 +40,7 @@ bool PngAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
   if (reader->readBytes(signature, 8) != 8) {
     return false;
   }
-  if (!PatternMatcher::match(signature, 8, PNG_SIGNATURE)) {
+  if (!PatternMatcher::match(signature, 8, getPngSignature())) {
     // Not a PNG file
     return false;
   }
@@ -68,12 +57,12 @@ bool PngAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
     }
 
     // 检查是否到达 IEND chunk
-    if (PatternMatcher::match(chunkType, 4, PNG_CHUNK_IEND)) {
+    if (PatternMatcher::match(chunkType, 4, getPngChunkIEND())) {
       break;
     }
 
     // 检查是否是 iTXt chunk
-    if (PatternMatcher::match(chunkType, 4, PNG_CHUNK_iTXt)) {
+    if (PatternMatcher::match(chunkType, 4, getPngChunkITXt())) {
       // iTXt chunk 格式:
       // - Keyword (null-terminated string)
       // - Compression flag (1 byte)
