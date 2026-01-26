@@ -4,21 +4,21 @@
 
 #include "gimt/gimt_png_aigc_reader.h"
 #include "gimt/gimt_xml_utils.h"
+#include "gimt/gimt_patter_matcher.h"
 
 #include <vector>
-#include <cstring>
 
 namespace gimt {
 
 // PNG 文件签名 (8 bytes)
-static const uint8_t PNG_SIGNATURE[8] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+static const std::vector<uint8_t> PNG_SIGNATURE = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
 
-// PNG Chunk Types (as 4-byte strings)
-static const char PNG_CHUNK_IEND[4] = {'I', 'E', 'N', 'D'};
-static const char PNG_CHUNK_iTXt[4] = {'i', 'T', 'X', 't'};
+// PNG Chunk Types
+static const std::vector<uint8_t> PNG_CHUNK_IEND = {'I', 'E', 'N', 'D'};
+static const std::vector<uint8_t> PNG_CHUNK_iTXt = {'i', 'T', 'X', 't'};
 
 // XMP keyword for iTXt chunk
-static const char PNG_XMP_KEYWORD[] = "XML:com.adobe.xmp";
+static const std::string PNG_XMP_KEYWORD = "XML:com.adobe.xmp";
 static const size_t PNG_XMP_KEYWORD_LEN = 17; // without null terminator
 
 bool PngAIGCReader::prepare(const std::string &filepath) {
@@ -51,7 +51,7 @@ bool PngAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
   if (reader->readBytes(signature, 8) != 8) {
     return false;
   }
-  if (!std::equal(PNG_SIGNATURE, PNG_SIGNATURE + 8, signature)) {
+  if (!PatternMatcher::match(signature, 8, PNG_SIGNATURE)) {
     // Not a PNG file
     return false;
   }
@@ -68,12 +68,12 @@ bool PngAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
     }
 
     // 检查是否到达 IEND chunk
-    if (std::equal(PNG_CHUNK_IEND, PNG_CHUNK_IEND + 4, chunkType)) {
+    if (PatternMatcher::match(chunkType, 4, PNG_CHUNK_IEND)) {
       break;
     }
 
     // 检查是否是 iTXt chunk
-    if (std::equal(PNG_CHUNK_iTXt, PNG_CHUNK_iTXt + 4, chunkType)) {
+    if (PatternMatcher::match(chunkType, 4, PNG_CHUNK_iTXt)) {
       // iTXt chunk 格式:
       // - Keyword (null-terminated string)
       // - Compression flag (1 byte)
@@ -99,7 +99,7 @@ bool PngAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
       }
 
       // 检查是否是 XMP keyword
-      if (std::memcmp(chunkData.data(), PNG_XMP_KEYWORD, PNG_XMP_KEYWORD_LEN) == 0 &&
+      if (PatternMatcher::matchString(chunkData.data(), chunkLength, PNG_XMP_KEYWORD) &&
           chunkData[PNG_XMP_KEYWORD_LEN] == '\0') {
         
         pos = PNG_XMP_KEYWORD_LEN + 1;
