@@ -1,9 +1,10 @@
 //
-// Test suite for PngAIGCReader - following TDD principles
+// Test suite for PngAIGCReader and PngAIGCWriter - following TDD principles
 // Testing behavior rather than implementation details
 //
 
 #include "gimt/gimt_png_aigc_reader.h"
+#include "gimt/gimt_png_aigc_writer.h"
 #include "gimt_testing_resource_finder.h"
 #include <gmock/gmock.h>
 
