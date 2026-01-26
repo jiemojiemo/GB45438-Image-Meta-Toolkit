@@ -8,6 +8,7 @@ add_executable(gimt_unit_tests
         test_jpeg_aigc_reader.cpp
         test_patter_matcher.cpp
         test_jpeg_aigc_writer.cpp
+        test_png_aigc_reader.cpp
 )
 target_link_libraries(gimt_unit_tests
         PRIVATE
