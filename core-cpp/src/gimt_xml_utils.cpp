@@ -37,12 +37,13 @@ std::string xmlEscape(const std::string &str) {
 }
 
 std::string xmlUnescape(const std::string &str) {
+  // IMPORTANT: &amp; must be replaced LAST to avoid double-unescaping
   static const std::pair<std::string, std::string> entities[] = {
       {"&quot;", "\""},
-      {"&amp;", "&"},
       {"&lt;", "<"},
       {"&gt;", ">"},
-      {"&apos;", "'"}};
+      {"&apos;", "'"},
+      {"&amp;", "&"}};
 
   std::string result = str;
   size_t start_pos = 0;
