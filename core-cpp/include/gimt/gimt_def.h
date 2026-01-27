@@ -36,6 +36,30 @@ constexpr uint32_t WEBP_FOURCC_RIFF = 0x46464952; // 'RIFF' in little-endian
 constexpr uint32_t WEBP_FOURCC_WEBP = 0x50424557; // 'WEBP' in little-endian
 constexpr uint32_t WEBP_FOURCC_XMP  = 0x20504D58; // 'XMP ' in little-endian
 
+// HEIF/HEIC Box Type Constants (Big-Endian, 4-byte FourCC codes)
+constexpr uint32_t HEIF_BOX_FTYP = 0x66747970; // 'ftyp'
+constexpr uint32_t HEIF_BOX_META = 0x6D657461; // 'meta'
+constexpr uint32_t HEIF_BOX_HDLR = 0x68646C72; // 'hdlr'
+constexpr uint32_t HEIF_BOX_IINF = 0x69696E66; // 'iinf'
+constexpr uint32_t HEIF_BOX_INFE = 0x696E6665; // 'infe'
+constexpr uint32_t HEIF_BOX_ILOC = 0x696C6F63; // 'iloc'
+constexpr uint32_t HEIF_BOX_MDAT = 0x6D646174; // 'mdat'
+
+// HEIF Item Type Constants
+constexpr uint32_t HEIF_ITEM_TYPE_MIME = 0x6D696D65; // 'mime'
+
+// HEIF Brand Constants
+constexpr uint32_t HEIF_BRAND_HEIC = 0x68656963; // 'heic'
+constexpr uint32_t HEIF_BRAND_MIF1 = 0x6D696631; // 'mif1'
+constexpr uint32_t HEIF_BRAND_HEVC = 0x68657663; // 'hevc'
+constexpr uint32_t HEIF_BRAND_HEVX = 0x68657678; // 'hevx'
+
+// HEIF Handler Type
+constexpr uint32_t HEIF_HANDLER_PICT = 0x70696374; // 'pict'
+
+// HEIF XMP MIME Type
+constexpr const char HEIF_XMP_MIME_TYPE[] = "application/rdf+xml";
+
 // XMP Signatures
 constexpr const char XMP_SIGNATURE[] = "http://ns.adobe.com/xap/1.0/";
 constexpr const char PNG_XMP_KEYWORD[] = "XML:com.adobe.xmp";
