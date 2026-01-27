@@ -33,9 +33,6 @@ private:
   
   // 构建 iTXt chunk 数据
   std::vector<uint8_t> buildITXtChunk(const std::string& xmpContent);
-  
-  // 写入 32 位大端整数
-  void writeU32BE(std::vector<uint8_t>& buffer, uint32_t value);
 };
 
 } // namespace gimt

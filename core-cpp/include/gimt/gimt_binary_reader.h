@@ -48,6 +48,16 @@ public:
            buf[3];
   }
 
+  uint32_t readU32LE() {
+    uint8_t buf[4];
+    // 只有完整读到 4 字节才转换
+    if (readBytes(buf, 4) != 4) return 0;
+    return static_cast<uint32_t>(buf[0]) |
+           (static_cast<uint32_t>(buf[1]) << 8) |
+           (static_cast<uint32_t>(buf[2]) << 16) |
+           (static_cast<uint32_t>(buf[3]) << 24);
+  }
+
   bool isEOF() {
     return stream.peek() == EOF;
   }

@@ -5,6 +5,7 @@
 #include "gimt/gimt_png_aigc_writer.h"
 #include "gimt/gimt_xml_utils.h"
 #include "gimt/gimt_patter_matcher.h"
+#include "gimt/gimt_binary_writer.h"
 
 #include <cstdint>
 #include <fstream>
@@ -16,13 +17,6 @@ namespace gimt {
 
 uint32_t PngAIGCWriter::calculateCRC32(const uint8_t* data, size_t length) {
   return crc32(0, data, static_cast<uInt>(length));
-}
-
-void PngAIGCWriter::writeU32BE(std::vector<uint8_t>& buffer, uint32_t value) {
-  buffer.push_back(static_cast<uint8_t>((value >> 24) & 0xFF));
-  buffer.push_back(static_cast<uint8_t>((value >> 16) & 0xFF));
-  buffer.push_back(static_cast<uint8_t>((value >> 8) & 0xFF));
-  buffer.push_back(static_cast<uint8_t>(value & 0xFF));
 }
 
 std::vector<uint8_t> PngAIGCWriter::buildITXtChunk(const std::string& xmpContent) {
@@ -54,7 +48,7 @@ std::vector<uint8_t> PngAIGCWriter::buildITXtChunk(const std::string& xmpContent
   
   // Length (4 bytes, big-endian) - 不包括 length 和 CRC 字段
   uint32_t dataLength = static_cast<uint32_t>(chunk.size());
-  writeU32BE(fullChunk, dataLength);
+  BinaryWriter::writeU32BE(fullChunk, dataLength);
   
   // Type (4 bytes): "iTXt"
   fullChunk.push_back('i');
@@ -67,7 +61,7 @@ std::vector<uint8_t> PngAIGCWriter::buildITXtChunk(const std::string& xmpContent
   
   // CRC (4 bytes) - 对 Type + Data 计算
   uint32_t crc = calculateCRC32(fullChunk.data() + 4, 4 + dataLength);
-  writeU32BE(fullChunk, crc);
+  BinaryWriter::writeU32BE(fullChunk, crc);
   
   return fullChunk;
 }

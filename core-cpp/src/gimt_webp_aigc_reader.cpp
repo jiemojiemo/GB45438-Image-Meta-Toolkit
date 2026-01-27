@@ -10,21 +10,6 @@
 
 namespace gimt {
 
-// WebP RIFF constants
-constexpr uint32_t FOURCC_RIFF = 0x46464952; // 'RIFF' in little-endian
-constexpr uint32_t FOURCC_WEBP = 0x50424557; // 'WEBP' in little-endian
-constexpr uint32_t FOURCC_XMP  = 0x20504D58; // 'XMP ' in little-endian
-
-// Helper function to read uint32 in little-endian
-inline uint32_t readU32LE(BinaryReader* reader) {
-  uint8_t buf[4];
-  if (reader->readBytes(buf, 4) != 4) return 0;
-  return static_cast<uint32_t>(buf[0]) |
-         (static_cast<uint32_t>(buf[1]) << 8) |
-         (static_cast<uint32_t>(buf[2]) << 16) |
-         (static_cast<uint32_t>(buf[3]) << 24);
-}
-
 bool WebpAIGCReader::prepare(const std::string &filepath) {
   if (stream.is_open()) {
     stream.close();
@@ -52,37 +37,37 @@ bool WebpAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
 
   // 验证 RIFF 头 (12 bytes)
   // 格式: 'RIFF' (4 bytes) + File Size (4 bytes) + 'WEBP' (4 bytes)
-  uint32_t riffTag = readU32LE(reader.get());
-  if (riffTag != FOURCC_RIFF) {
+  uint32_t riffTag = reader->readU32LE();
+  if (riffTag != WEBP_FOURCC_RIFF) {
     return false;
   }
 
   // 读取文件大小 (不需要验证，只是跳过)
-  uint32_t fileSize = readU32LE(reader.get());
+  uint32_t fileSize = reader->readU32LE();
   (void)fileSize; // 未使用
 
-  uint32_t webpTag = readU32LE(reader.get());
-  if (webpTag != FOURCC_WEBP) {
+  uint32_t webpTag = reader->readU32LE();
+  if (webpTag != WEBP_FOURCC_WEBP) {
     return false;
   }
 
   // 循环解析 WebP Chunks
   while (!reader->isEOF()) {
     // 读取 Chunk FourCC (4 bytes, little-endian)
-    uint32_t chunkId = readU32LE(reader.get());
+    uint32_t chunkId = reader->readU32LE();
     if (chunkId == 0) {
       // 读取失败，可能到达文件末尾
       break;
     }
 
     // 读取 Chunk Size (4 bytes, little-endian)
-    uint32_t chunkSize = readU32LE(reader.get());
+    uint32_t chunkSize = reader->readU32LE();
     if (chunkSize == 0 && reader->isEOF()) {
       break;
     }
 
     // 检查是否是 XMP chunk
-    if (chunkId == FOURCC_XMP) {
+    if (chunkId == WEBP_FOURCC_XMP) {
       // 读取 XMP 数据
       std::vector<uint8_t> xmpData(chunkSize);
       if (reader->readBytes(xmpData.data(), chunkSize) != chunkSize) {

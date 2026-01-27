@@ -31,6 +31,11 @@ inline std::vector<uint8_t> getPngChunkITXt() {
   return {'i', 'T', 'X', 't'};
 }
 
+// WebP RIFF Constants (Little-Endian)
+constexpr uint32_t WEBP_FOURCC_RIFF = 0x46464952; // 'RIFF' in little-endian
+constexpr uint32_t WEBP_FOURCC_WEBP = 0x50424557; // 'WEBP' in little-endian
+constexpr uint32_t WEBP_FOURCC_XMP  = 0x20504D58; // 'XMP ' in little-endian
+
 // XMP Signatures
 constexpr const char XMP_SIGNATURE[] = "http://ns.adobe.com/xap/1.0/";
 constexpr const char PNG_XMP_KEYWORD[] = "XML:com.adobe.xmp";
