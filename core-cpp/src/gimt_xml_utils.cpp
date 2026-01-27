@@ -72,21 +72,34 @@ std::string buildXmpPayload(const std::string &escapedJson) {
 }
 
 bool extractAigcJsonFromXmp(const std::string &xmpStr, std::string &outJson) {
-  const std::string targetKey = "TC260:AIGC=\"";
-  size_t startPos = xmpStr.find(targetKey);
-  if (startPos == std::string::npos) {
-    return false;
+  // Try attribute format first: TC260:AIGC="..."
+  const std::string attrKey = "TC260:AIGC=\"";
+  size_t startPos = xmpStr.find(attrKey);
+  if (startPos != std::string::npos) {
+    startPos += attrKey.length();
+    size_t endPos = xmpStr.find("\"", startPos);
+    if (endPos != std::string::npos && endPos > startPos) {
+      std::string escapedJson = xmpStr.substr(startPos, endPos - startPos);
+      outJson = xmlUnescape(escapedJson);
+      return true;
+    }
   }
 
-  startPos += targetKey.length();
-  size_t endPos = xmpStr.find("\"", startPos);
-  if (endPos == std::string::npos || endPos <= startPos) {
-    return false;
+  // Try tag format: <TC260:AIGC>...</TC260:AIGC>
+  const std::string tagStart = "<TC260:AIGC>";
+  const std::string tagEnd = "</TC260:AIGC>";
+  startPos = xmpStr.find(tagStart);
+  if (startPos != std::string::npos) {
+    startPos += tagStart.length();
+    size_t endPos = xmpStr.find(tagEnd, startPos);
+    if (endPos != std::string::npos && endPos > startPos) {
+      std::string escapedJson = xmpStr.substr(startPos, endPos - startPos);
+      outJson = xmlUnescape(escapedJson);
+      return true;
+    }
   }
 
-  std::string escapedJson = xmpStr.substr(startPos, endPos - startPos);
-  outJson = xmlUnescape(escapedJson);
-  return true;
+  return false;
 }
 
 } // namespace gimt
