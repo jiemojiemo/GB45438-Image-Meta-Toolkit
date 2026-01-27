@@ -234,7 +234,7 @@ bool HeifAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
                 // Check if this is XMP (application/rdf+xml)
                 if (contentType == HEIF_XMP_MIME_TYPE) {
                   xmpItemID = itemID;
-                  break;
+                  // Don't break - we still need to read all entries to properly skip the box
                 }
               }
 
@@ -242,9 +242,11 @@ bool HeifAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
             }
           }
 
-          if (xmpItemID != 0) {
-            // Found XMP item, skip rest of iinf
-            skipBox(reader.get(), metaChildHeader, iinfBytesRead);
+          // Skip to the end of iinf box
+          std::streamoff currentPos = reader->tell();
+          std::streamoff iinfEnd = beforeHeader + static_cast<std::streamoff>(metaChildHeader.size);
+          if (currentPos < iinfEnd) {
+            reader->skip(iinfEnd - currentPos);
           }
 
         } else if (metaChildHeader.type == HEIF_BOX_ILOC) {
@@ -413,14 +415,19 @@ bool HeifAIGCReader::readAIGCInfo(gimt::AIGCInfo &info) {
   // Convert to string
   std::string xmpStr(reinterpret_cast<const char*>(xmpData.data()), xmpLocation.extentLength);
 
-  // Verify it contains XMP metadata
-  if (xmpStr.find("<x:xmpmeta") == std::string::npos) {
+  // Verify it contains XMP metadata (check for either <?xpacket or <x:xmpmeta)
+  if (xmpStr.find("<x:xmpmeta") == std::string::npos && xmpStr.find("<?xpacket") == std::string::npos) {
     return false;
   }
 
   // Step 5: Extract AIGC JSON from XMP
   std::string pureJson;
   if (!extractAigcJsonFromXmp(xmpStr, pureJson)) {
+    // Debug: print why extraction failed
+    #ifdef DEBUG_HEIF_READER
+    std::cerr << "extractAigcJsonFromXmp failed\n";
+    std::cerr << "XMP string (first 300 chars): " << xmpStr.substr(0, 300) << "\n";
+    #endif
     return false;
   }
 
