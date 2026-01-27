@@ -11,6 +11,7 @@ add_executable(gimt_unit_tests
         test_png_aigc_reader.cpp
         test_png_aigc_writer.cpp
         test_webp_aigc_reader.cpp
+        test_gimt_webp_aigc_writer.cpp
 )
 target_link_libraries(gimt_unit_tests
         PRIVATE
