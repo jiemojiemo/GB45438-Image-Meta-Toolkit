@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "GIMT"
 include(":app")
+include(":app:gimt-api")
+include(":app:gimt-native")
