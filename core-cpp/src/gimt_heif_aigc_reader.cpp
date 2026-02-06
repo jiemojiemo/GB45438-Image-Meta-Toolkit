@@ -20,10 +20,12 @@ bool HeifAIGCReader::prepare(const std::string &filepath) {
   stream.open(filepath, std::ios::binary);
   if (!stream.is_open()) {
     reader.reset();
+    prepared_ = false;
     return false;
   }
 
   reader = std::make_unique<BinaryReader>(stream);
+  prepared_ = true;
   return true;
 }
 
