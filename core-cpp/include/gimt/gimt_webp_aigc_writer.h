@@ -6,6 +6,7 @@
 #define GIMT_WEBP_AIGC_WRITER_H
 
 #include "gimt_def.h"
+#include "gimt_aigc_writer.h"
 
 #include <cstdint>
 #include <string>
@@ -13,20 +14,22 @@
 
 namespace gimt {
 
-class WebpAIGCWriter {
+class WebpAIGCWriter : public IAIGCWriter {
 public:
   WebpAIGCWriter() = default;
 
   // 准备写入：读取输入 WebP 并记录输出路径
-  bool prepare(const std::string &inputFilepath, const std::string &outputFilepath);
+  bool prepare(const std::string &inputFilepath, const std::string &outputFilepath) override;
 
   // 将 AIGCInfo 写入输出 WebP 的 XMP chunk 中
-  bool writeAIGCInfo(const AIGCInfo &info);
+  bool writeAIGCInfo(const AIGCInfo &info) override;
+
+  // 获取支持的图像格式
+  ImageFormat getFormat() const override { return ImageFormat::WEBP; }
 
 private:
   std::vector<uint8_t> inputData_;
   std::string outputPath_;
-  bool prepared_{false};
 
   // 构建 XMP chunk 数据
   std::vector<uint8_t> buildXMPChunk(const std::string& xmpContent);
