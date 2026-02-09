@@ -62,3 +62,4 @@ AIGCWriterPtr AIGCWriterFactory::createAndPrepare(const std::string& inputFilepa
 
 } // namespace gimt
 
+
