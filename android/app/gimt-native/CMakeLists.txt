@@ -33,6 +33,7 @@ endif()
 # 添加 JNI 实现源文件
 add_library(${CMAKE_PROJECT_NAME} SHARED
     src/main/cpp/native_aigc_reader.cpp
+    src/main/cpp/native_aigc_writer.cpp
 )
 
 # 链接库
