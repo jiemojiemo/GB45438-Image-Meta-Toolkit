@@ -14,6 +14,13 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
+    sourceSets {
+        // 将根目录的 resource 文件夹链接到 androidTest 的 assets
+        getByName("androidTest") {
+            assets.srcDirs("../../../resource")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

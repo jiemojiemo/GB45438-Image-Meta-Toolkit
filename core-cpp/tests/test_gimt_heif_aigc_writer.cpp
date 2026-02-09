@@ -576,3 +576,4 @@ TEST_F(HeifAIGCWriterTest, WriterOutputShouldContainValidXMPStructure) {
 }
 
 
+

@@ -47,3 +47,4 @@ using AIGCWriterPtr = std::unique_ptr<IAIGCWriter>;
 
 #endif // GIMT_AIGC_WRITER_H
 
+

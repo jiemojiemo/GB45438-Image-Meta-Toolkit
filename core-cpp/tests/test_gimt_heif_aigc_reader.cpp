@@ -265,3 +265,4 @@ TEST_F(HeifAIGCReaderTest, ReaderShouldRecognizeHeicAsValidFormat) {
   ASSERT_THAT(result, IsTrue());
 }
 
+
