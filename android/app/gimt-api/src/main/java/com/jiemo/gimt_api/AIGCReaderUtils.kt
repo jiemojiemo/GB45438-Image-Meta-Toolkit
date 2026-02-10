@@ -22,3 +22,6 @@ interface AIGCReaderUtils {
     fun getSupportedFormats(): List<String>
 }
 
+
+
+

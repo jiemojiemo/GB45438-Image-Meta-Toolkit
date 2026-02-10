@@ -266,3 +266,6 @@ TEST_F(HeifAIGCReaderTest, ReaderShouldRecognizeHeicAsValidFormat) {
 }
 
 
+
+
+

@@ -106,3 +106,6 @@ fun testNativeImageProcessing() {
 
 如果其他模块（如 `gimt-api`）也需要使用这些测试资源，在对应的 `build.gradle.kts` 中添加相同的配置即可。
 
+
+
+

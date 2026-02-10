@@ -24,3 +24,6 @@ interface AIGCWriterUtils {
     fun getSupportedFormats(): List<String>
 }
 
+
+
+
