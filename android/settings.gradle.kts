@@ -16,6 +16,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
@@ -23,3 +24,4 @@ rootProject.name = "GIMT"
 include(":app")
 include(":app:gimt-api")
 include(":app:gimt-native")
+include(":app:sample")
